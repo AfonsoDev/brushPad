@@ -11,30 +11,38 @@
     <nav>
         <ul>
             <li>
-                <a href="#">File</a>
-                <ul class="dropdown">
-                    <li>
-                        <a href="">Novo</a>
-                    </li>
-                    <li>
-                        <a href="">Abrir</a>
-                    </li>
-                </ul>
+                <div id="menu-container">
+                    <button id="dropdown-btn">File</button>
+                    <div id="dropdown-content">
+                    <a href="#">New</a>
+                    <a href="#" id="openFile">Open</a>
+                    <a href="#" id="saveFile">Save as</a>
+                    </div>
+                </div>
             </li>
-            <li><a>Editar</a></li>
-            <li><a>Localizar</a></li>
         </ul>
     </nav>
 
     <div id="tabs">
-        <div class="tab" data-filepath="untitled.txt">Untitled</div>
+        <div class="tab" data-filepath="untitled.txt">
+            Untitled
+            <i>&#x2716;</i>
+        </div>
     </div>
-    <button id="openFile">
-        abrir
-    </button>
+
+    <button onclick="getSelectedText()">Obter Texto Selecionado</button>
+    
     <div id="editor-container">
-        <textarea id="editor"></textarea>
+        <div id="line-numbers"></div>
+        <textarea id="editor" contenteditable="true"></textarea>
     </div>
+    
+    <!-- <footer>
+        <ul>
+            <li>Col:</li>
+        </ul>
+    </footer> -->
+
     <script src="renderer.js"></script>
 </body>
 </html>

@@ -49,7 +49,7 @@
 // });
 
 
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog,globalShortcut  } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -68,6 +68,11 @@ function createWindow() {
   });
 
   mainWindow.loadFile('index.html');
+
+  globalShortcut.register('CommandOrControl+Alt+D', () => {
+    mainWindow.webContents.send('shortcut-triggered', 'Você pressionou o atalho!');
+  });
+  
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -114,4 +119,30 @@ app.on('window-all-closed', function () {
 
 app.on('activate', function () {
   if (mainWindow === null) createWindow();
+});
+
+ipcMain.on('save-file-dialog', (event, content) => {
+  const mainWindow = BrowserWindow.fromWebContents(event.sender);
+
+  dialog.showSaveDialog(mainWindow, {
+    title: 'Salvar Arquivo',
+    defaultPath: path.join(app.getPath('documents'), ''),
+    filters: [
+      { name: 'Text Files', extensions: ['txt', 'text'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  }).then((result) => {
+    if (!result.canceled) {
+      const filePath = result.filePath;
+      fs.writeFileSync(filePath, content, 'utf-8');
+      event.sender.send('file-saved', filePath);
+    }
+  }).catch((err) => {
+    console.error(err);
+  });
+});
+
+// Libera os atalhos globais quando o aplicativo é fechado
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });
