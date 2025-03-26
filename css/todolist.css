@@ -4,25 +4,27 @@
     gap: 8px;
     margin: 10px 0;
     padding: 8px;
-    background: #ffffff;
+    background: #2c3034;
     border-radius: 5px;
-    transition: background 0.3s ease, opacity 0.3s ease;
+    transition: all 0.3s ease;
+    border: 1px solid #373b3e;
 }
 
 .todo-item input[type="checkbox"] {
     appearance: none;
     width: 18px;
     height: 18px;
-    border: 2px solid #007bff;
+    border: 2px solid #0d6efd;
     border-radius: 4px;
     cursor: pointer;
     position: relative;
     transition: background 0.3s ease, border-color 0.3s ease;
+    background: #212529;
 }
 
 .todo-item input[type="checkbox"]:checked {
-    background: #007bff;
-    border-color: #007bff;
+    background: #0d6efd;
+    border-color: #0d6efd;
 }
 
 .todo-item input[type="checkbox"]::after {
@@ -41,36 +43,112 @@
 }
 
 .todo-item.checked {
-    background: #d4edda;
+    background: #1a1d20;
     opacity: 0.7;
     text-decoration: line-through;
     transform: scale(0.95);
     transition: all 0.3s ease-in-out;
 }
 
+.btn-remove-todo {
+    background: none;
+    border: none;
+    color: #dc3545;
+    padding: 4px 8px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.btn-remove-todo:hover {
+    opacity: 1;
+}
 
 #todo-sidebar {
     position: fixed;
     top: 0;
-    right: -490px;
-    /* Começa escondido */
-    width: 490px;
+    right: -300px;
+    width: 300px;
     height: 100vh;
-    background: #f8f9fa;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
-    padding: 15px;
+    background: #212529;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
     transition: right 0.3s ease-in-out;
     overflow-y: auto;
 }
 
 #todo-sidebar.show {
     right: 0;
-    /* Mostra o painel */
 }
 
-.todo-item {
+.todo-text {
+    flex: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    color: #e9ecef;
+}
+
+.todo-text:hover {
+    background-color: #343a40;
+}
+
+.todo-edit-input {
+    flex: 1;
+    margin: 0 8px;
+    padding: 4px 8px;
+    border: 1px solid #495057;
+    border-radius: 4px;
+    font-size: inherit;
+    background: #343a40;
+    color: #e9ecef;
+}
+
+.todo-edit-input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.command-suggestions {
+    position: absolute;
+    background: #2c3034;
+    border: 1px solid #495057;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    width: 300px;
+}
+
+.command-item {
+    padding: 8px 12px;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 10px 0;
+    justify-content: space-between;
+    transition: background-color 0.2s ease;
+}
+
+.command-item:hover {
+    background-color: #343a40;
+}
+
+.command-item.selected {
+    background-color: #0d6efd;
+}
+
+.command-name {
+    color: #0d6efd;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.command-description {
+    color: #adb5bd;
+    font-size: 0.9em;
+    margin-left: 8px;
+    text-align: right;
 }

@@ -166,3 +166,13 @@ footer{
   padding: 10px;
   font-weight: normal; /* Remover a formatação negrito padrão */
 } 
+
+#json-output {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  font-family: monospace;
+}
