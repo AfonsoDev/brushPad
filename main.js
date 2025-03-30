@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog,globalShortcut  } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog,globalShortcut, Menu  } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -10,11 +10,15 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    icon: path.join(__dirname, 'build/icon.png'), // Caminho do ícone
     webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
     }
   });
+  
+  // Remove o menu padrão
+  Menu.setApplicationMenu(null);
 
   mainWindow.loadFile('index.html');
 
@@ -142,4 +146,45 @@ ipcMain.on('load-todo-list-dialog', (event) => {
             });
         }
     });
+});
+
+// Add this after your existing IPC handlers
+ipcMain.on('new-file', (event) => {
+  // Create a new tab with default values
+  const newTab = {
+    filePath: `untitled${tabs.length + 1}.txt`,
+    title: `Untitled ${tabs.length + 1}`,
+    content: ""
+  };
+  
+  // Add the new tab to the tabs array
+  tabs.push(newTab);
+  
+  // Set the current tab to the new one
+  currentTab = tabs.length - 1;
+  
+  // Update the UI with the new tab
+  mainWindow.webContents.send('update-tabs', tabs);
+  mainWindow.webContents.send('update-editor', "");
+});
+
+// Add this after your existing IPC handlers
+ipcMain.on('close-tab', (event, tabIndex) => {
+  // Don't close if it's the last tab
+  if (tabs.length <= 1) return;
+  
+  // Remove the tab
+  tabs.splice(tabIndex, 1);
+  
+  // If we closed the current tab, switch to the previous tab
+  if (currentTab === tabIndex) {
+    currentTab = Math.max(0, tabIndex - 1);
+  } else if (currentTab > tabIndex) {
+    // If we closed a tab before the current tab, adjust the current tab index
+    currentTab--;
+  }
+  
+  // Update the UI
+  mainWindow.webContents.send('update-tabs', tabs);
+  mainWindow.webContents.send('update-editor', tabs[currentTab].content);
 });

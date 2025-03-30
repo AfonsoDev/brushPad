@@ -8,6 +8,8 @@ const todoSidebar = document.getElementById("todo-sidebar");
 const todoList = document.getElementById("todo-list");
 const todoToggle = document.getElementById('todo-toggle');
 const todoClose = document.getElementById('todo-close');
+const todoExport = document.getElementById('todo-export');
+const todoImport = document.getElementById('todo-import');
 
 // Initial setup
 ipcRenderer.send('update-tabs', [{ filePath: "untitled.txt", title: "Untitled", content: "" }]);
@@ -19,6 +21,19 @@ ipcRenderer.on('update-tabs', (event, tabs) => {
     tabElement.classList.add('tab');
     tabElement.textContent = tab.title || "Untitled";
     tabElement.dataset.index = index;
+    
+    // Add close button
+    const closeButton = document.createElement('button');
+    const icon = document.createElement('i');
+    icon.classList.add('bi', 'bi-x');
+    closeButton.classList.add('btn', 'btn-white');
+    closeButton.appendChild(icon);
+    closeButton.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent tab selection when clicking close
+      ipcRenderer.send('close-tab', index);
+    });
+    
+    tabElement.appendChild(closeButton);
     tabElement.addEventListener('click', () => changeTab(index));
     tabsContainer.appendChild(tabElement);
   });
@@ -45,29 +60,36 @@ ipcRenderer.on('selected-file', (event, filePath, content) => {
   ipcRenderer.send('open-file', filePath, content);
 });
 
-// Open file dialog
-document.getElementById('openFile').addEventListener('click', () => {
-  ipcRenderer.send('open-file-dialog');
-});
-
-ipcRenderer.on('selected-file', (event, filePath, content) => {
-  ipcRenderer.send('open-file', filePath, content);
-});
-
 document.addEventListener('DOMContentLoaded', (event) => {
   const dropdownBtn = document.getElementById('dropdown-btn');
   const dropdownContent = document.getElementById('dropdown-content');
+  const todoDropdownBtn = document.getElementById('todo-dropdown-btn');
+  const todoDropdownContent = document.getElementById('todo-dropdown-content');
 
   // Handle File menu
   dropdownBtn.addEventListener('click', () => {
     dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
+    todoDropdownContent.style.display = 'none';
   });
 
-  // Close menu if clicking outside
+  // Handle Todo List menu
+  todoDropdownBtn.addEventListener('click', () => {
+    todoDropdownContent.style.display = (todoDropdownContent.style.display === 'block') ? 'none' : 'block';
+    dropdownContent.style.display = 'none';
+  });
+
+  // Close menus if clicking outside
   window.addEventListener('click', (event) => {
-    if (!event.target.matches('#dropdown-btn')) {
+    if (!event.target.matches('#dropdown-btn') && !event.target.matches('#todo-dropdown-btn')) {
       dropdownContent.style.display = 'none';
+      todoDropdownContent.style.display = 'none';
     }
+  });
+
+  // Handle New file button
+  document.querySelector('.dropdown-item[href="#"]').addEventListener('click', (e) => {
+    e.preventDefault();
+    ipcRenderer.send('new-file');
   });
 
   const lineNumbers = document.getElementById('line-numbers');
@@ -102,6 +124,49 @@ document.addEventListener('DOMContentLoaded', (event) => {
   const todoSidebar = document.getElementById('todo-sidebar');
   const todoClose = document.getElementById('todo-close');
   const todoList = document.getElementById('todo-list');
+  const todoExport = document.getElementById('todo-export');
+  const todoImport = document.getElementById('todo-import');
+
+  // Export todo list
+  todoExport.addEventListener('click', (e) => {
+    e.preventDefault();
+    const todoItems = Array.from(todoList.children).map(item => ({
+      text: item.querySelector('.todo-text').textContent,
+      checked: item.querySelector('input[type="checkbox"]').checked
+    }));
+    ipcRenderer.send('save-todo-list', todoItems);
+  });
+
+  // Import todo list
+  todoImport.addEventListener('click', (e) => {
+    e.preventDefault();
+    ipcRenderer.send('load-todo-list-dialog');
+  });
+
+  // Handle imported todo list
+  ipcRenderer.on('todo-list-loaded', (event, todoData) => {
+    // Clear existing items
+    todoList.innerHTML = '';
+    
+    // Add imported items
+    todoData.forEach(item => {
+      const todoItem = document.createElement("div");
+      todoItem.classList.add("todo-item");
+      todoItem.draggable = true;
+
+      todoItem.innerHTML = `
+        <input type="checkbox" ${item.checked ? 'checked' : ''}>
+        <span class="todo-text">${item.text}</span>
+        <button class="btn-remove-todo ms-auto">
+          <i class="bi bi-trash"></i>
+        </button>
+      `;
+
+      // Add all the event listeners
+      setupTodoItemEventListeners(todoItem);
+      todoList.appendChild(todoItem);
+    });
+  });
 
   // Todo sidebar toggle functionality
   todoToggle.addEventListener('click', () => {
@@ -116,7 +181,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   // Handle todo item creation
   editorTextarea.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
+    if (event.key === "Tab") {
       event.preventDefault();
       
       const text = editorTextarea.value.trim();
@@ -291,17 +356,33 @@ document.addEventListener('DOMContentLoaded', (event) => {
   }
 });
 
-function createTodoItem(itemText) {
-  const todoItem = document.createElement("div");
-  todoItem.classList.add("todo-item");
+// Helper function to set up event listeners for todo items
+function setupTodoItemEventListeners(todoItem) {
+  // Add drag and drop functionality
+  todoItem.addEventListener('dragstart', function(e) {
+    e.dataTransfer.setData('text/plain', '');
+    this.classList.add('dragging');
+  });
 
-  todoItem.innerHTML = `
-    <input type="checkbox">
-    <span class="todo-text">${itemText}</span>
-    <button class="btn-remove-todo ms-auto">
-      <i class="bi bi-trash"></i>
-    </button>
-  `;
+  todoItem.addEventListener('dragend', function(e) {
+    this.classList.remove('dragging');
+  });
+
+  todoItem.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    const draggingItem = document.querySelector('.dragging');
+    if (draggingItem === this) return;
+    
+    const rect = this.getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const position = e.clientY < midY ? 'before' : 'after';
+    
+    if (position === 'before') {
+      todoList.insertBefore(draggingItem, this);
+    } else {
+      todoList.insertBefore(draggingItem, this.nextSibling);
+    }
+  });
 
   // Add click event for editing
   const todoText = todoItem.querySelector('.todo-text');
@@ -358,6 +439,23 @@ function createTodoItem(itemText) {
       todoItem.remove();
     }, 300);
   });
+}
+
+function createTodoItem(itemText) {
+  const todoItem = document.createElement("div");
+  todoItem.classList.add("todo-item");
+  todoItem.draggable = true;
+
+  todoItem.innerHTML = `
+    <input type="checkbox">
+    <span class="todo-text">${itemText}</span>
+    <button class="btn-remove-todo ms-auto">
+      <i class="bi bi-trash"></i>
+    </button>
+  `;
+
+  // Set up event listeners
+  setupTodoItemEventListeners(todoItem);
 
   todoList.appendChild(todoItem);
   // Show the sidebar when adding a new item

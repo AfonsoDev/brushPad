@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brush PAD</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>BrushPad</title>
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/todolist.css">
     <!-- Adicione isso no seu index.html -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,49 +18,29 @@
 
 <body>
 
-    <!-- <nav class="navbar navbar-expand navbar-light bg-light py-1">
-        <div class="container-fluid px-2">
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle py-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        File
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">New</a></li>
-                        <li><a class="dropdown-item" href="#" id="openFile">Open</a></li>
-                        <li><a class="dropdown-item" href="#" id="saveFile">Save as</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle py-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Format
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><button class="dropdown-item" onclick="formatJSON()">Format JSON</button></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </nav> -->
-
     <nav class="navbar navbar-expand navbar-dark bg-dark py-1">
         <div class="container-fluid px-2">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <div id="">
-                        <button id="dropdown-btn" class="nav-link dropdown-toggle py-1">File</button>
-                        <div id="dropdown-content" class="dropdown-menu">
-                            <a class="dropdown-item" href="#">New</a>
-                            <a class="dropdown-item" href="#" id="openFile">Open</a>
-                            <a class="dropdown-item" href="#" id="saveFile">Save as</a>
+                    <div id="menu-container">
+                        <button id="dropdown-btn" class="btn btn-link nav-link py-1 mr-3">File</button>
+                        <div id="dropdown-content" style="background-color: #1e1e1e !important;" class="dropdown-menu">
+                            <a class="dropdown-item" href="#" style="color: white !important;">New</a>
+                            <a class="dropdown-item" href="#" id="openFile" style="color: white !important;">Open</a>
+                            <a class="dropdown-item" href="#" id="saveFile" style="color: white !important;">Save as</a>
                         </div>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <div id="">
-                        <button id="dropdown-btn" class="btn btn-link nav-link">Format</button>
-                        <div id="dropdown-content" class="dropdown-menu">
-                            <button onclick="formatJSON()" class="dropdown-item">Format JSON</button>
+                    <div id="menu-container">
+                        <button id="todo-dropdown-btn" class="btn btn-link nav-link py-1 mr-3">Todo List</button>
+                        <div id="todo-dropdown-content" style="background-color: #1e1e1e !important;" class="dropdown-menu">
+                            <a class="dropdown-item" href="#" id="todo-export" style="color: white !important;">
+                                <i class="bi bi-upload me-2"></i>Export
+                            </a>
+                            <a class="dropdown-item" href="#" id="todo-import" style="color: white !important;">
+                                <i class="bi bi-download me-2"></i>Import
+                            </a>
                         </div>
                     </div>
                 </li>
@@ -71,7 +51,9 @@
     <div id="tabs">
         <div class="tab" data-filepath="untitled.txt">
             Untitled
-            <button class="btn-close btn-close-white" id="close-tab"></button>
+            <button class="btn btn-white w-5 h-5 ml-0">
+                <i class="bi bi-x"></i>
+            </button>
         </div>
     </div>
 
@@ -84,20 +66,21 @@
                 <span class="command-description text-white">Add a new todo item</span>
             </div>
         </div>
-        <pre id="json-output"><code class="language-json"></code></pre>
     </div> 
     <button id="todo-toggle" class="btn btn-dark position-fixed" style="right: 10px; bottom: 10px; z-index: 1000; border-radius: 50%; width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-        <i class="bi bi-list-task"></i>
+        <i class="bi bi-list-check"></i>
     </button>
     <div id="todo-sidebar" class="position-fixed" style="right: -300px; top: 0; height: 100vh; width: 300px; transition: right 0.3s ease;">
         <div class="bg-dark text-light p-3 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="m-0">To-Do List</h3>
-                <button class="btn-close btn-close-white" id="todo-close"></button>
+                <button class="btn btn-dark" id="todo-close">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
             </div>
             <div id="todo-list"></div>
         </div>
-    </div>
+    </div>  
     <div id="blocks"></div>
 
     <!-- <footer>
